@@ -30,8 +30,35 @@ const idGenerator = (start) => {
   return () => {
     return id++;
   }
-  
+
 }
+
+// Helpers for the getDistance function:
+const squared = (num) => {
+  return Math.pow(num, 2);
+}
+
+const radians = (deg) => {
+  return deg * Math.PI / 180;
+}
+
+// Solves for distance based on the haversine formula and returns result
+const getDistance = (lon1, lat1, lon2, lat2) => {
+
+  // Earth's radius in miles
+  const radius = 3959;
+
+  // Turn all degree values to radians:
+  let rLon1 = radians(lon1);
+  let rLat1 = radians(lat1);
+  let rLon2 = radians(lon2);
+  let rLat2 = radians(lat2);
+
+  return 2 * radius * Math.asin(Math.sqrt(
+    squared(Math.sin((rLat2 - rLat1) / 2)) + Math.cos(rLat2) * Math.cos(rLat1) * squared(Math.sin((rLon2 - rLon1) / 2))
+    ));
+
+};
 
 /******************** MAIN FUNCTIONS **********************/
 
@@ -87,6 +114,15 @@ const matchByDistance = (tree, data) => {
     maxY: latitude + 0.075
   }
 
+  let results = [];
+  let area = tree.search(range);
+
+  for (let k = 0; k < area.length; k++) {
+    if (getDistance(longitude, latitude, area[k].Longitude, area[k].Latitude) <= 5) {
+      results.push(area[k]);
+    }
+  }
+
   matchByCategory(tree.search(range), data);
 
 };
@@ -96,15 +132,17 @@ const matchByDistance = (tree, data) => {
 module.exports = (rTree, callback) => {
 
   let results = [];
+  let getId = idGenerator(1);
 
   fs.createReadStream(path.resolve(__dirname + '/../resources/Customers.csv'))
     .pipe(parse({columns: true}))
     .on('data', function(csvrow) {
 
+      csvrow.id = getId();
       matchByDistance(rTree, csvrow);
 
     })
-    .on('end',function() {
+    .on('end', function() {
       for (var x = 0; x < 5; x++) {
 
       }

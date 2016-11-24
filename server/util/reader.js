@@ -41,7 +41,7 @@ module.exports = (rTree, callback) => {
       csvrow.maxY = latitude;
 
       csvrow.id = giveId();
-      toNumber(csvrow, ['Restrictions', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
+      toNumber(csvrow, ['Restrictions', 'Latitude', 'Longitude', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
       rTree.insert(csvrow);
     })
     .on('end',function() {
