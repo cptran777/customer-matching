@@ -14,7 +14,7 @@ module.exports = (rTree) => {
 	fs.createReadStream(path.resolve(__dirname + '/../resources/Recipients.csv'))
 		.pipe(parse({columns: true}))
 		.on('data', function(csvrow) {
-	        csvData.push(csvrow);        
+	      csvData.push(csvrow);        
 	    })
 	    .on('end',function() {
 	    	for (let x = 0; x < csvData.length; x++) {
