@@ -15,18 +15,32 @@ const toNumber = (data, properties) => {
 
 };
 
+const idGenerator = (start) => {
+
+  let id = start;
+
+  return () => {
+    return id++;
+  }
+}
+
 module.exports = (rTree, callback) => {
+
+  let giveId = idGenerator(1);
 
   fs.createReadStream(path.resolve(__dirname + '/../resources/Recipients.csv'))
     .pipe(parse({columns: true}))
     .on('data', function(csvrow) {
+
       let latitude = parseFloat(csvrow.Latitude);
       let longitude = parseFloat(csvrow.Longitude);
+
       csvrow.minX = longitude;
       csvrow.maxX = longitude;
       csvrow.minY = latitude;
       csvrow.maxY = latitude;
 
+      csvrow.id = giveId();
       toNumber(csvrow, ['Restrictions', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
       rTree.insert(csvrow);
     })

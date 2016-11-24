@@ -19,6 +19,20 @@ const timeAsBit = (time) => {
   return Math.pow(2, time - 8);
 };
 
+// Creates a self imposed Id so that we can set the primary key in the database and keep track
+// of it here without having to make an additional db call
+// Note, this code is not DRY, as it appears in reader as well. Probably will move after everything
+// else is done
+const idGenerator = (start) => {
+
+  let id = start;
+
+  return () => {
+    return id++;
+  }
+  
+}
+
 /******************** MAIN FUNCTIONS **********************/
 
 // Final filter, after matching by category will match if time syncs up with 
