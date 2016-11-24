@@ -12,6 +12,7 @@ let bodyparser = require('body-parser');
 // Project related dependencies
 let rbush = require('rbush');
 let reader = require('./util/reader');
+let matcher = require('./util/matcher');
 
 /******************* INIT MIDDLEWARE ***********************/
 
@@ -28,16 +29,25 @@ app.use(bodyparser.json());
 
 /********************* INIT R TREE *************************/
 
-reader();
+let rTree = rbush();
+
+reader(rTree, (tree) => {
+  matcher(tree);
+});
 
 /*
 ALGORITHM FOR MATCHING
 
 - First go for the spatial match using the R-Tree
-  - Since the limit is 5 miles, and each degree of latitude/longitude is approx 69 miles, a 5 mile unit
-    is approx. 1/14 of a latitude degree, which comes out to about .072 as an upper bound. Adding this to
-    the x and y coords of a point will give an appropriate estimate box to calculate further with the 
-    haversine formula
+  - Parameters to pass to the search:
+    - Since latitude and longitude distances vary by geolocation, the best way to set the parameters is
+      by rough estimation:
+      Each degree of latitude is approx 69 miles regardless of geolocation
+      By this we can estimate that 5 miles is approximately 1/14 of a degree, or 0.071, or rounding to 0.075
+      for a boundary we can get everything in the Y bound for an estimated box
+      For Longitude, 1 deg of longitude = cos(latitude) * length of miles at equator, since most of 
+      the items are at approx 37 latitude, 1 deg of longitude here is about 55 miles. 5 miles is 1/11
+      or so of a degree, which is about 0.091, so 0.095 is a good boundary for our x values
   - Within each space, use Haversine formula to ensure proper distance matching
   - Will return with a list of initially eligible locations by distance
 

@@ -7,23 +7,31 @@ let fs = require('fs');
 let path = require('path');
 let parse = require('csv-parse');
 
-module.exports = (rTree) => {
+const toNumber = (data, properties) => {
+  
+  for (let x = 0; x < properties.length; x++) {
+    data[properties[x]] = Number(data[properties[x]]);
+  }
 
-	let csvData = [];
+};
+
+module.exports = (rTree, callback) => {
 
   fs.createReadStream(path.resolve(__dirname + '/../resources/Recipients.csv'))
     .pipe(parse({columns: true}))
     .on('data', function(csvrow) {
-      csvData.push(csvrow);        
+      let latitude = parseFloat(csvrow.Latitude);
+      let longitude = parseFloat(csvrow.Longitude);
+      csvrow.minX = longitude;
+      csvrow.maxX = longitude;
+      csvrow.minY = latitude;
+      csvrow.maxY = latitude;
+
+      toNumber(csvrow, ['Restrictions', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday']);
+      rTree.insert(csvrow);
     })
     .on('end',function() {
-      for (let x = 0; x < csvData.length; x++) {
-        csvData[x].coordX = -(parseFloat(csvData[x].Longitude) + 122) * 100
-        csvData[x].coordY = (parseFloat(csvData[x].Latitude) - 37) * 100
-        if (x < 10) {
-          console.log(csvData[x]);
-        }
-      }
+      callback(rTree);
     });
 
 };
