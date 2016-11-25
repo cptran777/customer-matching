@@ -6,8 +6,13 @@
 let fs = require('fs');
 let path = require('path');
 let parse = require('csv-parse');
+let db = require('../db/init');
 
 /******************** HELPER FUNCTIONS *********************/
+
+let idGenerator = require('./lib').idGenerator;
+let toNumber = require('./lib').toNumber;
+let createDbQuery = require('./lib').createDbQuery;
 
 const getDayAsString = (day) => {
   return ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'][day];
@@ -18,20 +23,6 @@ const getDayAsString = (day) => {
 const timeAsBit = (time) => {
   return Math.pow(2, time - 8);
 };
-
-// Creates a self imposed Id so that we can set the primary key in the database and keep track
-// of it here without having to make an additional db call
-// Note, this code is not DRY, as it appears in reader as well. Probably will move after everything
-// else is done
-const idGenerator = (start) => {
-
-  let id = start;
-
-  return () => {
-    return id++;
-  }
-
-}
 
 // Helpers for the getDistance function:
 const squared = (num) => {
@@ -78,7 +69,14 @@ const matchByTime = (recipients, customer) => {
     }
   }
 
-  // TODO: Put results into database
+  for (let m = 0; m < results.length; m++) {
+    let data = {
+      recipient: results[m].id,
+      customer: customer.id
+    }
+
+    createDbQuery('recipients_customers', data);
+  }
 
 };
 
@@ -139,6 +137,9 @@ module.exports = (rTree, callback) => {
     .on('data', function(csvrow) {
 
       csvrow.id = getId();
+      toNumber(csvrow, ['Latitude', 'Longitude', 'Categories']);
+
+      createDbQuery('customers', csvrow);
       matchByDistance(rTree, csvrow);
 
     })

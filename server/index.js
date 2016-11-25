@@ -8,6 +8,7 @@ console.log('Starting server...');
 let express = require('express');
 let path = require('path');
 let bodyparser = require('body-parser');
+require('dotenv').config();
 
 // Project related dependencies
 let rbush = require('rbush');
