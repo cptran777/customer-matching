@@ -5,15 +5,15 @@ CREATE DATABASE matching;
 
 CREATE TABLE recipients (
   id int not null primary key,
-  FirstName char(25),
-  LastName char(25),
-  Street char(100),
-  City char(25),
-  State char(25),
-  Postal char(10),
-  Country char(10),
-  Email char(50),
-  Phone char(25),
+  FirstName text,
+  LastName text,
+  Street text,
+  City text,
+  State text,
+  Postal text,
+  Country text,
+  Email text,
+  Phone text,
   Latitude numeric,
   Longitude numeric,
   Restrictions int,
@@ -28,20 +28,20 @@ CREATE TABLE recipients (
 
 CREATE TABLE customers (
   id int not null primary key,
-  FirstName char(25),
-  LastName char(25),
-  Street char(100),
-  City char(25),
-  State char(25),
-  Postal char(10),
-  Country char(10),
-  Email char(50),
-  Phone char(25),
+  FirstName text,
+  LastName text,
+  Street text,
+  City text,
+  State text,
+  Postal text,
+  Country text,
+  Email text,
+  Phone text,
   Latitude numeric,
   Longitude numeric,
   Categories int,
-  PickupAt char(50),
-  TimeZoneId char(25)
+  PickupAt text,
+  TimeZoneId text
 );
 
 CREATE TABLE recipients_customers (

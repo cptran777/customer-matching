@@ -10,6 +10,8 @@ let path = require('path');
 let bodyparser = require('body-parser');
 require('dotenv').config();
 
+let db = require('./db/init');
+
 // Project related dependencies
 let rbush = require('rbush');
 let reader = require('./util/reader');
@@ -32,9 +34,11 @@ app.use(bodyparser.json());
 
 let rTree = rbush();
 
-reader(rTree, (tree) => {
-  matcher(tree);
-});
+// reader(rTree, (tree) => {
+//   matcher(tree);
+// });
+
+db.connect();
 
 /*
 ALGORITHM FOR MATCHING
@@ -70,6 +74,46 @@ ALGORITHM FOR MATCHING
 
 app.get('/', (req, res) => {
   res.sendFile(path.resolve(__dirname + '/../client/public/index.html'));
+});
+
+app.get('/matches', (req, res) => {
+
+  console.log('matches request receieved');
+
+    // db.connect((err) => {
+
+      // if (err) throw err;
+      db.query('SELECT c.firstname as cust_firstname, c.lastname as cust_lastname, c.street as cust_street, ' + 
+        'r.firstname as rec_firstname, r.lastname as rec_lastname, r.street as rec_street ' + 
+        'from customers as c ' +
+        'inner join recipients_customers as rc ' +
+        'on rc.customer = c.id ' + 
+        'inner join recipients as r ' +
+        'on rc.recipient = r.id', (err, result) => {
+        if (err) throw err;
+
+        let headings = ['cust_firstname', 'cust_lastname', 'cust_street', 'rec_firstname', 'rec_lastname', 'rec_street'];
+        let rows = [];
+
+        for (let x = 0; x < result.rows.length; x++) {
+          let row = [];
+
+          for (let y = 0; y < headings.length; y++) {
+            row.push(result.rows[x][headings[y]]);
+          }
+
+          rows.push(row);
+        }
+
+        // db.end();
+        res.send({
+          headings,
+          rows
+        });
+      });
+
+    // });
+
 });
 
 /********************* INIT SERVER *************************/
